@@ -98,13 +98,10 @@
 (setq doom-themes-treemacs-theme "all-the-icons")
 (treemacs-resize-icons 18)
 
-;; Cursor
-;;(setq evil-insert-state-cursor '((bar . 1) "black")
-;;      evil-normal-state-cursor '(box "black"))
-
 ;; tema claro      
 ;;(setq doom-theme 'doom-one-light)
 
+;; Theme kaolin
 (require 'kaolin-themes)
 ;;dark
 ;;aurora
@@ -112,3 +109,100 @@
 ;;valley-dark
 (load-theme 'kaolin-dark t)
 
+;; tabbar
+(use-package tabbar
+  :ensure t
+  :bind
+  ("<M-left>" . tabbar-backward)
+  ("<M-right>" . tabbar-forward)
+
+  :config
+  (set-face-attribute
+   'tabbar-button nil
+   :box '(:line-width 1 :color "gray19"))
+
+  (set-face-attribute
+   'tabbar-selected nil
+   :foreground "white"
+   :background "gray19"
+   :box '(:line-width 1 :color "gray19"))
+
+  (set-face-attribute
+   'tabbar-unselected nil
+   :foreground "gray75"
+   :background "gray25"
+   :box '(:line-width 1 :color "gray19"))
+
+  (set-face-attribute
+   'tabbar-highlight nil
+   :foreground "black"
+   :background "white"
+   :underline nil
+   :box '(:line-width 1 :color "gray19" :style nil))
+
+  (set-face-attribute
+   'tabbar-modified nil
+   :foreground "white"
+   :background "gray25"
+   :box '(:line-width 1 :color "gray19"))
+
+  (set-face-attribute
+   'tabbar-selected-modified nil
+   :foreground "white"
+   :background "gray19"
+   :box '(:line-width 1 :color "gray19"))
+
+  (custom-set-variables
+   '(tabbar-separator (quote (0.2))))
+
+  (defun tabbar-buffer-tab-label (tab)
+    "Return a label for TAB.
+  That is, a string used to represent it on the tab bar."
+    (let ((label  (if tabbar--buffer-show-groups
+                      (format " [%s] " (tabbar-tab-tabset tab))
+                    (format " %s " (tabbar-tab-value tab)))))
+      (if tabbar-auto-scroll-flag
+          label
+        (tabbar-shorten
+         label (max 1 (/ (window-width)
+                         (length (tabbar-view
+                                  (tabbar-current-tabset)))))))))
+
+  (defun px-tabbar-buffer-select-tab (event tab)
+    "On mouse EVENT, select TAB."
+    (let ((mouse-button (event-basic-type event))
+          (buffer (tabbar-tab-value tab)))
+      (cond
+       ((eq mouse-button 'mouse-2) (with-current-buffer buffer (kill-buffer)))
+       ((eq mouse-button 'mouse-3) (pop-to-buffer buffer t))
+       (t (switch-to-buffer buffer)))
+      (tabbar-buffer-show-groups nil)))
+
+  (defun px-tabbar-buffer-help-on-tab (tab)
+    "Return the help string shown when mouse is onto TAB."
+    (if tabbar--buffer-show-groups
+        (let* ((tabset (tabbar-tab-tabset tab))
+               (tab (tabbar-selected-tab tabset)))
+          (format "mouse-1: switch to buffer %S in group [%s]"
+                  (buffer-name (tabbar-tab-value tab)) tabset))
+      (format "\
+mouse-1: switch to %S\n\
+mouse-2: kill %S\n\
+mouse-3: Open %S in another window"
+              (buffer-name (tabbar-tab-value tab))
+              (buffer-name (tabbar-tab-value tab))
+              (buffer-name (tabbar-tab-value tab)))))
+
+  (defun px-tabbar-buffer-groups ()
+    "Sort tab groups."
+    (list (cond ((or
+                  (eq major-mode 'dired-mode)
+                  (string-equal "*" (substring (buffer-name) 0 1))) "emacs")
+                (t "user"))))
+  (setq tabbar-help-on-tab-function 'px-tabbar-buffer-help-on-tab
+        tabbar-select-tab-function 'px-tabbar-buffer-select-tab
+        tabbar-buffer-groups-function 'px-tabbar-buffer-groups)
+
+  :init
+  (tabbar-mode 1))
+  
