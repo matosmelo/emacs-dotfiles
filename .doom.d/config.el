@@ -85,10 +85,7 @@
 (global-set-key (kbd "C-S-<down>") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-S-<up>") 'mc/mark-previous-like-this)
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
-
 ;; Ivy Posframe
 (ivy-posframe-mode 1)
 
@@ -205,4 +202,17 @@ mouse-3: Open %S in another window"
 
   :init
   (tabbar-mode 1))
-  
+
+;; margem limite  
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+
+;; Standard Jedi.el setting ;; auto completar...
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+
+;; traparencia    
+;;(set-frame-parameter (selected-frame) 'alpha '(90 50))
+;;(add-to-list 'default-frame-alist '(alpha 90 50))
+
+
